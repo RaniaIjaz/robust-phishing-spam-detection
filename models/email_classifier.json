@@ -1,0 +1,62 @@
+{
+  "task": "phishing_email",
+  "model": "logreg_email_union",
+  "features": "word 1-2gram + char_wb 3-5gram TF-IDF (capped)",
+  "input_truncation_chars": 2000,
+  "trained_at": "2026-09-16T09:22:06+00:00",
+  "n_train": 65988,
+  "n_validation": 16498,
+  "threshold": 0.252,
+  "fn_cost_ratio": 10.0,
+  "validation_split": "random over pooled corpora",
+  "validation_metrics": {
+    "threshold": 0.252,
+    "accuracy": 0.9832,
+    "precision": 0.9698,
+    "recall": 0.9988,
+    "f1": 0.9841,
+    "roc_auc": 0.9995,
+    "pr_auc": 0.9995,
+    "brier": 0.0092,
+    "tp": 8569,
+    "fp": 267,
+    "tn": 7652,
+    "fn": 10
+  },
+  "WARNING": "validation_metrics are inflated. Train and validation share source corpora, and a probe identifies the corpus with 92% accuracy, so the model can score well by recognising the corpus. Use leave_one_corpus_out below as the realistic expectation on mail from an unseen source.",
+  "leave_one_corpus_out_model": "logreg_email (word-only). Measured by scripts/09_corpus_generalisation.py on the word-only variant, not on this word+char model; treat as indicative rather than exact for this model.",
+  "leave_one_corpus_out": {
+    "ceas": {
+      "recall": 0.9435,
+      "f1": 0.929
+    },
+    "enron": {
+      "recall": 0.8274,
+      "f1": 0.8305
+    },
+    "ling": {
+      "recall": 0.8472,
+      "f1": 0.8472
+    },
+    "nazario": {
+      "recall": 0.6575,
+      "f1": null
+    },
+    "nigerian": {
+      "recall": 0.991,
+      "f1": null
+    },
+    "spamassassin": {
+      "recall": 0.9598,
+      "f1": 0.8774
+    }
+  },
+  "expected_performance": "Recall on phishing from an unfamiliar source may be as low as ~0.66 (Nazario holdout). Do not quote the validation F1 as real-world accuracy.",
+  "known_limits": [
+    "Training corpora date mostly from 2002 and 2008.",
+    "52% phishing base rate; real mailflow is a few percent, so precision in deployment will be substantially lower.",
+    "Headers, URLs and attachments are ignored; text only.",
+    "Text alone cannot separate a genuine invoice from invoice fraud: the demo's legitimate invoice email scores as phishing. Sender and header signals are needed for that distinction.",
+    "Unusual characters raise the phishing score, so non-ASCII or copy-pasted legitimate mail is prone to false positives. Consistent with corpus leakage: the phishing corpora carry encoding artifacts the ham corpora do not."
+  ]
+}

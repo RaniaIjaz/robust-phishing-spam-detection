@@ -1,0 +1,12 @@
+probe_accuracy,eval,n_train,n_test,test_phish_pct,recall,f1,precision,pr_auc,note
+0.9191,B naive mixed (random split),61864,20622,52.0,0.9882,0.9873,0.9864,0.9989,
+0.9191,C holdout=ceas,43332,39154,55.8,0.9435,0.929,0.9149,0.9608,
+0.9191,C holdout=enron,52719,29767,47.0,0.8274,0.8305,0.8337,0.9229,
+0.9191,C holdout=ling,79627,2859,16.0,0.8472,0.8472,0.8472,0.9068,
+0.9191,C holdout=nazario,80921,1565,100.0,0.6575,,,,single-class test set: recall only
+0.9191,C holdout=nigerian,79154,3332,100.0,0.991,,,,single-class test set: recall only
+0.9191,C holdout=spamassassin,76677,5809,29.6,0.9598,0.8774,0.8079,0.9746,
+0.9191,D within=ceas,29365,9789,55.8,0.9945,0.9965,0.9985,0.9998,
+0.9191,D within=spamassassin,4356,1453,29.6,0.9721,0.9698,0.9676,0.9854,
+0.9191,D within=enron,22325,7442,46.9,0.9957,0.9853,0.9751,0.9973,
+0.9191,D within=ling,2144,715,16.1,0.9826,0.9826,0.9826,0.9989,

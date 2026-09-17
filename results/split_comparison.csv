@@ -1,0 +1,6 @@
+model,grouped,random,delta
+logreg_char,0.9344,0.9598,-0.0254
+logreg_union,0.9577,0.9677,-0.01
+logreg_word,0.8935,0.9355,-0.042
+nb_word,0.8602,0.8973,-0.0371
+svm_union,0.9218,0.9783,-0.0565

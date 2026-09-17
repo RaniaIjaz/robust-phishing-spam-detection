@@ -1,0 +1,287 @@
+{
+  "model": "logreg_union",
+  "metrics": {
+    "threshold": 0.412,
+    "accuracy": 0.9892,
+    "precision": 0.9551,
+    "recall": 0.9605,
+    "f1": 0.9577,
+    "roc_auc": 0.9893,
+    "pr_auc": 0.9826,
+    "brier": 0.0153,
+    "tp": 170,
+    "fp": 8,
+    "tn": 1208,
+    "fn": 7
+  },
+  "missed_spam": [
+    {
+      "score": 0.0327,
+      "text": "Do you ever notice that when you're driving, anyone going slower than you is an idiot and everyone driving faster than you is a maniac?"
+    },
+    {
+      "score": 0.0449,
+      "text": "Hello darling how are you today? I would love to have a chat, why dont you tell me what you look like and what you are in to sexy?"
+    },
+    {
+      "score": 0.0937,
+      "text": "Do you realize that in about 40 years, we'll have thousands of old ladies running around with tattoos?"
+    },
+    {
+      "score": 0.2228,
+      "text": "Sorry I missed your call let's talk when you have the time. I'm on 07090201529"
+    },
+    {
+      "score": 0.2424,
+      "text": "Hi this is Amy, we will be sending you a free phone number in a couple of days, which will give you an access to all the adult parties..."
+    },
+    {
+      "score": 0.2621,
+      "text": "This message is brought to you by GMW Ltd. and is not connected to the"
+    },
+    {
+      "score": 0.3829,
+      "text": "Oh my god! I've found your number again! I'm so glad, text me back xafter this msgs cst std ntwk chg £1.50"
+    }
+  ],
+  "false_alarms": [
+    {
+      "score": 0.763,
+      "text": "I liked the new mobile"
+    },
+    {
+      "score": 0.6569,
+      "text": "Yup next stop."
+    },
+    {
+      "score": 0.4847,
+      "text": "Miss call miss call khelate kintu opponenter miss call dhorte lage. Thats d rule. One with great phone receiving quality wins."
+    },
+    {
+      "score": 0.4836,
+      "text": "They have a thread on the wishlist section of the forums where ppl post nitro requests. Start from the last page and collect from the bottom up."
+    },
+    {
+      "score": 0.4414,
+      "text": "Can u get pic msgs to your phone?"
+    },
+    {
+      "score": 0.4339,
+      "text": "Host-based IDPS for linux systems."
+    },
+    {
+      "score": 0.433,
+      "text": "Urgh, coach hot, smells of chip fat! Thanks again, especially for the duvet (not a predictive text word)."
+    },
+    {
+      "score": 0.4227,
+      "text": "Send me the new number"
+    }
+  ],
+  "features": {
+    "spam_indicative": [
+      {
+        "feature": "w__txt",
+        "weight": 2.224
+      },
+      {
+        "feature": "c__00",
+        "weight": 2.212
+      },
+      {
+        "feature": "w__call",
+        "weight": 2.098
+      },
+      {
+        "feature": "w__text",
+        "weight": 2.007
+      },
+      {
+        "feature": "c__ 0",
+        "weight": 1.887
+      },
+      {
+        "feature": "c__50",
+        "weight": 1.832
+      },
+      {
+        "feature": "w__uk",
+        "weight": 1.811
+      },
+      {
+        "feature": "w__free",
+        "weight": 1.633
+      },
+      {
+        "feature": "w__to",
+        "weight": 1.619
+      },
+      {
+        "feature": "c__0 ",
+        "weight": 1.587
+      },
+      {
+        "feature": "c__ 8",
+        "weight": 1.515
+      },
+      {
+        "feature": "c__xt",
+        "weight": 1.501
+      },
+      {
+        "feature": "c__ 1",
+        "weight": 1.494
+      },
+      {
+        "feature": "w__your",
+        "weight": 1.483
+      },
+      {
+        "feature": "c__08",
+        "weight": 1.476
+      },
+      {
+        "feature": "w__mobile",
+        "weight": 1.465
+      },
+      {
+        "feature": "w__stop",
+        "weight": 1.456
+      },
+      {
+        "feature": "w__www",
+        "weight": 1.408
+      },
+      {
+        "feature": "w__from",
+        "weight": 1.379
+      },
+      {
+        "feature": "w__won",
+        "weight": 1.367
+      },
+      {
+        "feature": "w__reply",
+        "weight": 1.293
+      },
+      {
+        "feature": "w__new",
+        "weight": 1.287
+      },
+      {
+        "feature": "c__xt ",
+        "weight": 1.277
+      },
+      {
+        "feature": "c__ £",
+        "weight": 1.253
+      },
+      {
+        "feature": "c__80",
+        "weight": 1.248
+      }
+    ],
+    "ham_indicative": [
+      {
+        "feature": "c__..",
+        "weight": -1.627
+      },
+      {
+        "feature": "w__my",
+        "weight": -1.38
+      },
+      {
+        "feature": "c__i ",
+        "weight": -1.306
+      },
+      {
+        "feature": "c__ i",
+        "weight": -1.3
+      },
+      {
+        "feature": "w__me",
+        "weight": -1.292
+      },
+      {
+        "feature": "c__ i ",
+        "weight": -1.236
+      },
+      {
+        "feature": "c__.. ",
+        "weight": -0.986
+      },
+      {
+        "feature": "w__ok",
+        "weight": -0.983
+      },
+      {
+        "feature": "c__...",
+        "weight": -0.942
+      },
+      {
+        "feature": "w__that",
+        "weight": -0.94
+      },
+      {
+        "feature": "w__am",
+        "weight": -0.85
+      },
+      {
+        "feature": "c__... ",
+        "weight": -0.839
+      },
+      {
+        "feature": "w__da",
+        "weight": -0.788
+      },
+      {
+        "feature": "w__it",
+        "weight": -0.756
+      },
+      {
+        "feature": "w__gt",
+        "weight": -0.75
+      },
+      {
+        "feature": "c__me ",
+        "weight": -0.744
+      },
+      {
+        "feature": "w__lt",
+        "weight": -0.732
+      },
+      {
+        "feature": "w__come",
+        "weight": -0.726
+      },
+      {
+        "feature": "w__but",
+        "weight": -0.714
+      },
+      {
+        "feature": "w__can",
+        "weight": -0.686
+      },
+      {
+        "feature": "w__he",
+        "weight": -0.678
+      },
+      {
+        "feature": "w__ll",
+        "weight": -0.67
+      },
+      {
+        "feature": "w__how",
+        "weight": -0.668
+      },
+      {
+        "feature": "w__lt gt",
+        "weight": -0.667
+      },
+      {
+        "feature": "w__are you",
+        "weight": -0.651
+      }
+    ]
+  }
+}

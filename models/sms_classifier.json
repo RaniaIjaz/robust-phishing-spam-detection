@@ -1,0 +1,31 @@
+{
+  "task": "sms_spam",
+  "model": "logreg_union",
+  "features": "word 1-2gram + char_wb 2-5gram TF-IDF",
+  "trained_at": "2026-09-16T09:19:51+00:00",
+  "n_train": 4460,
+  "n_validation": 1114,
+  "threshold": 0.45,
+  "fn_cost_ratio": 10.0,
+  "validation_split": "grouped (near-duplicate clusters kept together)",
+  "validation_metrics": {
+    "threshold": 0.45,
+    "accuracy": 0.991,
+    "precision": 0.9658,
+    "recall": 0.9658,
+    "f1": 0.9658,
+    "roc_auc": 0.986,
+    "pr_auc": 0.9795,
+    "brier": 0.0142,
+    "tp": 141,
+    "fp": 5,
+    "tn": 963,
+    "fn": 5
+  },
+  "expected_performance": "F1 ~0.97 on SMS resembling the 2011 UCI corpus. Robust to character-level evasion (see results/robustness.csv).",
+  "known_limits": [
+    "Trained on 2011-era UK/Singapore SMS; modern scam styles may differ.",
+    "Label noise present in training data.",
+    "Not evaluated under adaptive (model-querying) attacks."
+  ]
+}

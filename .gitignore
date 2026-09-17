@@ -1,0 +1,25 @@
+__pycache__/
+*.pyc
+.venv/
+data/raw/*
+!data/raw/.gitkeep
+# Parsed GloVe cache (~160 MB), rebuilt automatically by src/embeddings.py.
+data/processed/*
+# Trained binaries are regenerable with scripts/11_train_final.py.
+# The .json model cards are small and kept.
+models/*.joblib
+
+# Kaggle download (~78 MB); extract with scripts/06_extract_phishing.py.
+archive.zip
+
+# Personal notes, not part of the project.
+LOR_brief.md
+LOR_draft.txt
+PROJECT_GUIDE.md
+
+# Local environment / editor / OS files.
+.env
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
