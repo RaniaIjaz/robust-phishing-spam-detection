@@ -98,7 +98,30 @@ ATTACKS = {
 }
 
 
+# Lookalikes from Latin-extended, Armenian, Coptic and rarer Cyrillic blocks.
+# None of them is in the normaliser's confusables table in defences.py, and
+# NFKC does not fold any of them to Latin. This is the attacker who has read
+# the defence: same trick, different characters.
+UNSEEN_HOMOGLYPHS = {
+    "a": "ɑ", "c": "ϲ", "e": "ҽ", "i": "ӏ", "j": "ϳ",
+    "o": "օ", "p": "ⲣ", "s": "ꜱ", "x": "ҳ", "y": "ү",
+}
+
+
+def homoglyph_unseen(text: str, rate: float = 0.15, seed: int = 0) -> str:
+    """Homoglyph substitution using characters a defence has not listed."""
+    rng = random.Random(seed)
+    hit = _targets(text, set(UNSEEN_HOMOGLYPHS), rate, rng)
+    return "".join(UNSEEN_HOMOGLYPHS[ch.lower()] if i in hit else ch
+                   for i, ch in enumerate(text))
+
+
+# Kept out of ATTACKS so that no defence is ever trained on it, and so that
+# experiment 2 is unchanged. Used only to test defences in experiment 6.
+HELD_OUT_ATTACKS = {"homoglyph_unseen": homoglyph_unseen}
+
+
 def apply_attack(texts, name: str, rate: float, seed: int = 0) -> list[str]:
     """Apply one named attack to every message, varying the per-message seed."""
-    fn = ATTACKS[name]
+    fn = ATTACKS[name] if name in ATTACKS else HELD_OUT_ATTACKS[name]
     return [fn(t, rate=rate, seed=seed + i) for i, t in enumerate(texts)]

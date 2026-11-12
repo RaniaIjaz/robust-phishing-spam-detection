@@ -15,7 +15,9 @@ All three answers are no. The third is the one that would matter in
 deployment; the second is the one that most published results get wrong.
 
 It then compares TF-IDF against word embeddings (GloVe, plus word2vec and
-FastText implemented from scratch) on the same three questions.
+FastText implemented from scratch) on the same three questions, and finally
+builds defences against the evasion attacks and tests whether those defences
+hold up against attacks they were not built for (mostly, they do not).
 
 ---
 
@@ -230,6 +232,100 @@ explaining this; `scripts/08_check_dates.py` is the evidence.
 
 ---
 
+## Fifth result: defences work on the attacks they were built for, and much less on the rest
+
+The second result showed what breaks under evasion. This one tries to fix it,
+then attacks the fix. Two kinds of defence (`src/defences.py`):
+
+- **Input normalisation.** Strip invisible characters, fold Unicode (NFKC),
+  map common Cyrillic and Greek lookalikes back to Latin, rejoin spaced-out
+  words (`F R E E`, `c.l.i.c.k`), and turn digits back into letters only
+  where a letter is expected (`fr33` → `free`, but `150p` and `0800` are left
+  alone). Applied at training *and* prediction time.
+- **Adversarial training.** Add one perturbed copy of every training message
+  per attack, at a random strength. Ham is perturbed too, so the model cannot
+  learn "odd characters mean spam".
+
+A defence that is only tested on the attacks it was designed for is grading
+its own homework, so there are two extra checks:
+
+- **Leave-one-attack-out.** Train on four attacks, test on the fifth.
+- **Unseen homoglyphs.** An attacker who has read the normaliser and uses
+  lookalike characters it does not list (`ɑ ҽ ӏ օ ꜱ`, `homoglyph_unseen` in
+  `src/perturb.py`). No defence ever trains on it.
+
+Spam recall at 50% perturbation, SMS corpus, leakage-aware split.
+"Held out" means adversarial training never saw that attack:
+
+**`logreg_word`** (the model that collapsed in the second result)
+
+| Attack | No defence | Normalise | Adv. training | Adv. training, held out |
+|---|---|---|---|---|
+| zero-width | 0.644 | **0.972** | 0.944 | 0.723 |
+| homoglyph | 0.870 | **0.972** | 0.955 | 0.887 |
+| leetspeak | 0.864 | 0.955 | 0.955 | 0.881 |
+| typo | 0.763 | 0.763 | **0.949** | 0.763 |
+| spacing | 0.938 | 0.966 | 0.960 | 0.955 |
+| **unseen homoglyphs** | 0.870 | **0.870** | 0.927 | — |
+| clean F1 / false positives | 0.894 / 36 | 0.894 / 36 | 0.860 / 51 | |
+
+**`logreg_union`** (word + character features, the family the deployed SMS
+model belongs to)
+
+| Attack | No defence | Normalise + adv. training | Same, held out |
+|---|---|---|---|
+| zero-width | 0.921 | 0.966 | 0.966 |
+| typo | 0.876 | **0.960** | 0.927 |
+| spacing | 0.921 | 0.955 | 0.960 |
+| unseen homoglyphs | 0.944 | 0.955 | — |
+| clean F1 / false positives | 0.958 / 8 | 0.955 / 10 | |
+
+Full tables for all three models and four defence settings are in
+`results/defences_summary.csv`; the chart is `results/defences.png`.
+
+What this shows:
+
+- **Normalisation is precise and brittle.** It fully repairs zero-width and
+  homoglyph evasion on the word model at no clean cost. Against the same
+  trick with characters missing from its table it does *nothing*: 0.870
+  before, 0.870 after. A rule list protects against the attacks its author
+  thought of.
+- **Adversarial training transfers only partly.** Trained on all five
+  attacks, the word model recovers to 0.94-0.96 everywhere. With the scored
+  attack held out, zero-width recall is 0.723 and typo recall does not move
+  (0.763). Most of the gain is memorising specific tricks, not general
+  robustness.
+- **Adversarial training costs precision on ordinary messages.** On the word
+  model, clean false positives ranged from 35 to 58 across five training
+  seeds, against 36 undefended.
+- **The cheapest defence was already in place.** Character n-grams
+  (`logreg_char`) lose at most 0.03 recall to any attack, including unseen
+  homoglyphs, and no defence improves them meaningfully. The best feature
+  choice did more than either defence bolted onto a weak one.
+- **On SMS, leetspeak is also how people write.** The normaliser changes 313
+  of 5,574 *clean* messages: `gr8` → `grb`, `ni8` → `nib`, `MobileUpd8` →
+  `MobileUpdb`. Textspeak and evasion use the same characters, so every
+  de-leet rule damages some honest text. Its cost is small here (clean F1
+  unchanged on the word model) but it is not zero, and it would differ on
+  another corpus.
+
+**How much the numbers can be trusted.** The test set has 177 spam
+messages, so one message is 0.006 recall; differences under about 0.02 are
+one to three messages and should not be read as a ranking. Adversarial
+training depends on a random draw, so the three headline cases were rerun
+with five seeds (`scripts/15_defence_seeds.py`,
+`results/defence_seeds.csv`):
+
+| Case | All attacks trained | Attack held out |
+|---|---|---|
+| word, adv. training, zero-width | 0.870-0.944 | 0.712-0.757 |
+| word, adv. training, typo | 0.893-0.955 | 0.757-0.791 |
+| union, normalise + adv. training, typo | 0.955-0.961 | 0.927-0.938 |
+
+The held-out gap holds on every seed.
+
+---
+
 ## Quick start
 
 ```bash
@@ -240,6 +336,8 @@ python scripts/00_check_env.py
 python scripts/01_download_data.py
 python scripts/02_run_baselines.py       # split comparison
 python scripts/03_robustness.py          # evasion attacks
+python scripts/14_defences.py            # defences, then attack the defences
+python scripts/15_defence_seeds.py       # seed sensitivity of those results
 python scripts/04_error_analysis.py      # read the errors
 python scripts/05_profile_data.py
 
@@ -321,13 +419,16 @@ exact.
 config.py            paths, seed, cost ratio, duplicate threshold
 src/data.py          SMS loading; random vs leakage-aware splitting
 src/corpora.py       email corpora; temporal + leave-one-corpus-out splits
-src/perturb.py       five evasion attacks
+src/perturb.py       five evasion attacks + one held-out homoglyph attack
+src/defences.py      input normalisation; adversarial-training augmentation
 src/models.py        six TF-IDF pipelines (word / char / union / email-scale)
 src/evaluate.py      metrics, cost-sensitive thresholds, error dumps
 src/embeddings.py    word2vec + FastText from scratch; GloVe loader
 scripts/00..09_*.py  the experiments, in order
-scripts/10_smoke_test.py    30 checks across every module
+scripts/10_smoke_test.py    checks across every module
 scripts/13_embeddings.py    experiment 5: word embeddings
+scripts/14_defences.py      experiment 6: defences and attacks on them
+scripts/15_defence_seeds.py experiment 6b: seed sensitivity
 scripts/11_train_final.py   train + save deployable models
 scripts/12_predict.py       classify new messages; --demo
 models/              saved classifiers + JSON model cards
@@ -359,9 +460,14 @@ results/             generated CSV, JSON and plots
   `nigerian` leaves a single-class test set, so only recall is defined. Recall
   on unseen phishing is still the operationally meaningful number, but it is
   not comparable to the F1 values in the same table.
-- **Attacks are non-adaptive and test-time only.** A real attacker would query
-  the model. Adversarial *training* — perturbing the training set too — is the
-  obvious defence and is not evaluated here.
+- **Attacks are non-adaptive.** A real attacker would query the model and
+  search for the edit that flips it. The held-out homoglyph attack is a crude
+  stand-in for an attacker who adapts to the defence; a query-based attack
+  against the defended models is not evaluated.
+- **Defences are evaluated on SMS only.** The email corpus has the corpus
+  leakage problem from the first result, which would confound any robustness
+  comparison there. Thresholds for defended models are picked on clean
+  validation data, matching how the undefended models were tuned.
 - **Label noise is present.** Manual error reading surfaced SMS messages
   labelled spam that read as ordinary forwarded jokes
   (`results/error_analysis.json`). Some residual error is the ceiling of the

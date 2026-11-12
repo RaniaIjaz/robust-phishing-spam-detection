@@ -88,6 +88,52 @@ def main() -> int:
     check("top_errors fp",
           lambda: top_errors(test["text"], test["label"], s, 0.5, "fp"))
 
+    print("\ndefences")
+    from src.defences import augment, normalise, with_normaliser
+    from src.perturb import HELD_OUT_ATTACKS
+
+    def held_out_attack():
+        from src.perturb import UNSEEN_HOMOGLYPHS
+        out = apply_attack(["please call now"], "homoglyph_unseen", 1.0)
+        assert out[0] != "please call now"
+        # NFKC may fold some of them (lunate sigma -> final sigma), but never
+        # back to the Latin letter they imitate.
+        for latin, glyph in UNSEEN_HOMOGLYPHS.items():
+            assert normalise(glyph) != latin, (glyph, latin)
+    check("held-out homoglyph attack", held_out_attack)
+
+    def normalise_undoes_attacks():
+        s = "free prize call now"
+        for a in ["zero_width", "homoglyph"]:
+            got = normalise(apply_attack([s], a, 1.0, seed=1)[0])
+            assert got == s, (a, got)
+        # Two adjacent spaced-out words cannot be told apart ("f r e e
+        # p r i z e"), so spacing is checked on one attackable word.
+        for seed in range(4):
+            got = normalise(apply_attack(["prize now"], "spacing", 1.0,
+                                         seed=seed)[0])
+            assert got == "prize now", got
+        assert normalise("fr33 pr1z3") == "free prize"
+    check("normalise undoes zero-width, homoglyph, spacing, leet",
+          normalise_undoes_attacks)
+
+    def normalise_keeps_numbers():
+        for s in ["call 09061701461", "150p/msg", "1hr", "4giv", "U.K"]:
+            assert normalise(s) == s, (s, normalise(s))
+    check("normalise leaves real numbers alone", normalise_keeps_numbers)
+
+    def augment_sizes():
+        t, y = augment(["a b c", "d e f"], [0, 1], ["typo", "spacing"])
+        assert len(t) == len(y) == 6 and y == [0, 1, 0, 1, 0, 1]
+    check("augment adds one copy per message per attack", augment_sizes)
+
+    def normalised_model():
+        m = with_normaliser(build_model("logreg_char"))
+        m.fit(train["text"], train["label"])
+        assert scores(m, test["text"]).shape == (len(test),)
+    check("with_normaliser fits and scores", normalised_model)
+    assert set(HELD_OUT_ATTACKS).isdisjoint(ATTACKS)
+
     print("\nword embeddings (glove excluded: it needs a ~130 MB download)")
     from src.embeddings import build_embedding_model, char_ngrams, tokenize
 
